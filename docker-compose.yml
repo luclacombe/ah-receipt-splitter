@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./translations.json:/app/translations.json
+      - ./bonus_matches.json:/app/bonus_matches.json
+    restart: unless-stopped

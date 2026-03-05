@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+receipts/
+processed/
+*.pdf
+!fixtures/sample_receipt.pdf
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+dist/
+build/
+*.egg-info/

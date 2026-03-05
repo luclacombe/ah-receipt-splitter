@@ -1,0 +1,64 @@
+[project]
+name = "ah-receipt-splitter"
+version = "1.0.0"
+description = "Split Albert Heijn grocery receipts between roommates"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Luc Lacombe"}]
+requires-python = ">=3.11"
+dependencies = [
+    "pdfplumber>=0.11",
+    "streamlit>=1.40",
+    "anthropic>=0.40",
+    "ollama>=0.4",
+    "python-dotenv>=1.0",
+    "weasyprint>=63",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pre-commit>=4.0",
+    "reportlab>=4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/luclacombe/ah-receipt-splitter"
+Repository = "https://github.com/luclacombe/ah-receipt-splitter"
+Issues = "https://github.com/luclacombe/ah-receipt-splitter/issues"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = [
+    "E501",   # Inline HTML strings are unavoidably long
+    "SIM102", # Nested ifs are intentional for Streamlit button rendering (side effects)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "config",
+    "i18n",
+    "theme",
+    "state",
+    "receipt_parser",
+    "translator",
+    "report",
+    "components",
+]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
