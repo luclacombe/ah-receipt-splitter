@@ -1,8 +1,9 @@
 """Translate Dutch AH receipt items to English and match bonuses to items.
 
-Uses Claude Haiku if ANTHROPIC_API_KEY is set, otherwise falls back to
-Ollama running locally. Both paths use persistent JSON caches so each
-unique item/bonus is only ever sent to the LLM once.
+Uses Claude Haiku if ANTHROPIC_API_KEY is set, GPT-4o-mini if OPENAI_API_KEY
+is set, otherwise falls back to Ollama running locally. Both paths use
+persistent JSON caches so each unique item/bonus is only ever sent to the
+LLM once.
 """
 
 import json
@@ -10,7 +11,7 @@ import logging
 import os
 from pathlib import Path
 
-from config import BONUS_MATCHES_FILE, HAIKU_MODEL, OLLAMA_MODEL, TRANSLATIONS_FILE
+from config import BONUS_MATCHES_FILE, HAIKU_MODEL, OLLAMA_MODEL, OPENAI_MODEL, TRANSLATIONS_FILE
 
 logger = logging.getLogger(__name__)
 
@@ -28,12 +29,14 @@ def _save_cache(path: Path, data: dict[str, str]) -> None:
 
 
 def _call_llm(system: str, user: str) -> str:
-    """Call LLM backend: Claude Haiku if ANTHROPIC_API_KEY is set, else Ollama."""
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
-    if api_key:
+    """Call LLM backend: Claude Haiku, GPT-4o-mini, or Ollama (in that order)."""
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    openai_key = os.environ.get("OPENAI_API_KEY", "").strip()
+
+    if anthropic_key:
         import anthropic
 
-        client = anthropic.Anthropic(api_key=api_key)
+        client = anthropic.Anthropic(api_key=anthropic_key)
         resp = client.messages.create(
             model=HAIKU_MODEL,
             max_tokens=1024,
@@ -41,6 +44,19 @@ def _call_llm(system: str, user: str) -> str:
             messages=[{"role": "user", "content": user}],
         )
         return resp.content[0].text
+    elif openai_key:
+        from openai import OpenAI
+
+        client = OpenAI(api_key=openai_key)
+        resp = client.chat.completions.create(
+            model=OPENAI_MODEL,
+            max_tokens=1024,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+        )
+        return resp.choices[0].message.content
     else:
         try:
             import ollama
@@ -57,7 +73,8 @@ def _call_llm(system: str, user: str) -> str:
             raise RuntimeError(
                 f"Ollama is not available ({e}). "
                 "Either install and run Ollama (https://ollama.com) with "
-                f"model '{OLLAMA_MODEL}', or set ANTHROPIC_API_KEY in your .env file."
+                f"model '{OLLAMA_MODEL}', or set ANTHROPIC_API_KEY or "
+                "OPENAI_API_KEY in your .env file."
             ) from e
 
 

@@ -15,6 +15,7 @@ AH_LOGO_URL: str = (
 
 # LLM models
 HAIKU_MODEL: str = "claude-haiku-4-5"
+OPENAI_MODEL: str = "gpt-4o-mini"
 OLLAMA_MODEL: str = "llama3.2:3b"
 
 # Cache files

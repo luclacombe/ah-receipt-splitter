@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🛒 AH Receipt Splitter
+# AH Receipt Splitter
 
-**Split Albert Heijn grocery receipts fairly between roommates**
+**Split Albert Heijn grocery receipts between roommates**
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.54-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
@@ -11,41 +11,43 @@
 
 <br>
 
-Upload PDF receipts from the **Albert Heijn** app, assign each item to yourself or your roommate (or split shared items 50/50), and download a polished PDF report showing exactly who owes what.
+Upload PDF receipts from the **Albert Heijn** app, assign each item to yourself or your roommate (or split shared items 50/50), and download a PDF report showing who owes what.
 
 <br>
 
-<img src="docs/screenshot-review.png" alt="Review step — assign items to each person" width="800">
-<br>
-<img src="docs/screenshot-summary.png" alt="Summary — see who owes what" width="800">
+<img src="docs/screenshot-review.png" alt="Review step: assign items to each person" width="600">
+
+<br><br>
+
+<img src="docs/screenshot-summary.png" alt="Summary: see who owes what" width="600">
 
 </div>
 
 ---
 
-## ✨ Features
+## Features
 
 | Feature | Description |
 |---------|-------------|
 | **PDF Parsing** | Extracts items, quantities, prices, and bonus discounts from AH receipt PDFs |
 | **Bonus Card Handling** | Automatically distributes bonus savings across discounted items |
-| **Bilingual UI** | Full Dutch and English interface — choose your language on launch |
-| **Smart Translation** | Dutch item names are translated to English via LLM with persistent caching |
+| **Bilingual UI** | Dutch and English interface, selectable on launch |
+| **Smart Translation** | Dutch item names translated to English via LLM with persistent caching |
 | **Intelligent Matching** | Bonus codes matched to items via price, substring, or LLM fallback |
-| **PDF Reports** | Generates a branded, print-ready split report with full breakdown |
-| **Flexible LLM Backend** | Uses Claude Haiku (API) or Ollama (local, free) — your choice |
+| **PDF Reports** | Generates a print-ready split report with full breakdown |
+| **Flexible LLM Backend** | Claude Haiku, GPT-4o-mini, or Ollama (local, free) |
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```mermaid
 graph LR
-    A["📄 Upload PDF"] --> B["🔍 receipt_parser.py\npdfplumber + regex"]
-    B --> C["🌐 translator.py\nDutch → English\n+ bonus matching"]
-    C --> D["📋 Review UI\nItem assignment"]
-    D --> E["📊 report.py\nWeasyPrint → PDF"]
-    E --> F["📥 Download Report"]
+    A["Upload PDF"] --> B["receipt_parser.py\npdfplumber + regex"]
+    B --> C["translator.py\nDutch > English\n+ bonus matching"]
+    C --> D["Review UI\nItem assignment"]
+    D --> E["report.py\nWeasyPrint > PDF"]
+    E --> F["Download Report"]
 
     style A fill:#E8F4FA,stroke:#00A0E2,color:#003D97
     style F fill:#E8F4FA,stroke:#00A0E2,color:#003D97
@@ -53,19 +55,19 @@ graph LR
 
 ### How It Works
 
-1. **Parse** — `pdfplumber` extracts text from the AH receipt PDF. Regex patterns identify item lines (name, qty, unit price, total, bonus flag) and bonus discount lines.
+1. **Parse** - `pdfplumber` extracts text from the AH receipt PDF. Regex patterns identify item lines (name, qty, unit price, total, bonus flag) and bonus discount lines.
 
-2. **Match Bonuses** — Bonus codes (e.g. `AHBROCCOLILO`) are matched to items via price matching → substring matching → LLM fallback. Group bonuses (`ALLE*`) are distributed proportionally.
+2. **Match Bonuses** - Bonus codes (e.g. `AHBROCCOLILO`) are matched to items via price matching, then substring matching, then LLM fallback. Group bonuses (`ALLE*`) are distributed proportionally.
 
-3. **Translate** — Dutch item names are batch-translated via Claude Haiku or Ollama. Results are cached in `translations.json` so each item is only ever translated once.
+3. **Translate** - Dutch item names are batch-translated via Claude Haiku, GPT-4o-mini, or Ollama. Results are cached in `translations.json` so each item is only translated once.
 
-4. **Assign** — The Streamlit UI lets you assign each item as **Mine** / **Roommate** / **Shared** with bulk-assign shortcuts.
+4. **Assign** - The Streamlit UI lets you assign each item as **Mine** / **Roommate** / **Shared** with bulk-assign shortcuts.
 
-5. **Report** — WeasyPrint renders a branded HTML template to a PDF with the full cost breakdown.
+5. **Report** - WeasyPrint renders a branded HTML template to a PDF with the full cost breakdown.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Docker (recommended)
 
@@ -101,7 +103,7 @@ streamlit run app.py
 
 ### Demo Mode
 
-A sample receipt is included for testing without an AH account:
+A sample receipt is included for testing.
 
 ```bash
 # Upload fixtures/sample_receipt.pdf in the app to try the full flow
@@ -109,19 +111,20 @@ A sample receipt is included for testing without an AH account:
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `ANTHROPIC_API_KEY` | No | — | Claude Haiku API key for item translation |
+| `ANTHROPIC_API_KEY` | No | - | Claude Haiku API key for item translation |
+| `OPENAI_API_KEY` | No | - | GPT-4o-mini API key (used if no Anthropic key) |
 
-**No API key?** The app falls back to [Ollama](https://ollama.com) running locally with `llama3.2:3b`. Install Ollama, pull the model (`ollama pull llama3.2:3b`), and leave `ANTHROPIC_API_KEY` unset.
+Set **one** of these keys — Anthropic is checked first, then OpenAI. **No API key?** The app falls back to [Ollama](https://ollama.com) running locally with `llama3.2:3b`. Install Ollama, pull the model (`ollama pull llama3.2:3b`), and leave both keys unset.
 
-**In Dutch mode** no translation is needed at all — the app skips LLM calls entirely.
+**In Dutch mode** no translation is needed, so the app skips LLM calls entirely.
 
 ---
 
-## 🧑‍💻 Development
+## Development
 
 ```bash
 pip install -r requirements-dev.txt
@@ -136,19 +139,19 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Frontend** | [Streamlit](https://streamlit.io) — interactive web UI |
-| **PDF Parsing** | [pdfplumber](https://github.com/jsvine/pdfplumber) — text extraction from receipts |
-| **Translation** | [Claude Haiku](https://docs.anthropic.com) or [Ollama](https://ollama.com) — Dutch → English |
-| **PDF Generation** | [WeasyPrint](https://weasyprint.org) — HTML → PDF report |
-| **Language** | Python 3.11+ with type hints |
+| **Frontend** | [Streamlit](https://streamlit.io) |
+| **PDF Parsing** | [pdfplumber](https://github.com/jsvine/pdfplumber) |
+| **Translation** | [Claude Haiku](https://docs.anthropic.com), [GPT-4o-mini](https://platform.openai.com), or [Ollama](https://ollama.com) |
+| **PDF Generation** | [WeasyPrint](https://weasyprint.org) |
+| **Language** | Python 3.11+ |
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ah-receipt-splitter/
@@ -157,9 +160,9 @@ ah-receipt-splitter/
 ├── i18n.py                   # Bilingual UI + report strings
 ├── theme.py                  # AH brand CSS + header
 ├── state.py                  # Session state management
-├── receipt_parser.py         # PDF → structured data
+├── receipt_parser.py         # PDF > structured data
 ├── translator.py             # LLM translation + bonus matching
-├── report.py                 # HTML → PDF report
+├── report.py                 # HTML > PDF report
 ├── components/
 │   ├── language.py           # Language selection screen
 │   ├── upload.py             # File upload + parsing
@@ -173,6 +176,6 @@ ah-receipt-splitter/
 
 ---
 
-## 📄 License
+## License
 
-[MIT](LICENSE) — use it, fork it, improve it.
+[MIT](LICENSE)
