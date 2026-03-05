@@ -15,11 +15,11 @@ Upload PDF receipts from the **Albert Heijn** app, assign each item to yourself 
 
 <br>
 
-<img src="docs/screenshot-review.png" alt="Review step: assign items to each person" width="600">
+<img src="docs/screenshot-review.png" alt="Review step: assign items to each person">
 
 <br><br>
 
-<img src="docs/screenshot-summary.png" alt="Summary: see who owes what" width="600">
+<img src="docs/screenshot-summary.png" alt="Summary: see who owes what">
 
 </div>
 
